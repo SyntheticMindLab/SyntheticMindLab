@@ -1,0 +1,49 @@
+name: Update LAB OS dashboard
+
+on:
+  schedule:
+    - cron: "0 */12 * * *"      # every 12 hours
+  workflow_dispatch:            # manual "Run workflow" button
+  push:
+    branches: [main]
+    paths:
+      - "scripts/build_dashboard.py"
+      - "config.json"
+      - "assets/src/**"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dashboard
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generate dashboard SVGs from live GitHub data
+        env:
+          # Optional: add a repo secret named PROFILE_TOKEN (classic PAT, scope: read:user)
+          # to also count private contributions. Falls back to the built-in token.
+          GH_TOKEN: ${{ secrets.PROFILE_TOKEN || secrets.GITHUB_TOKEN }}
+        run: python3 scripts/build_dashboard.py
+
+      - name: Commit changes
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/generated
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "chore: refresh LAB OS dashboard [skip ci]"
+            git push
+          fi
