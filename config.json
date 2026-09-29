@@ -1,0 +1,10 @@
+{
+  "user": "SyntheticMindLab",
+  "tagline_lines": [
+    "Building practical AI tools, learning systems,",
+    "on-chain intelligence and automation for the real world.",
+    "Experimenting. Documenting. Sharing."
+  ],
+  "stack_extra": ["git", "github", "vscode"],
+  "max_icons": 13
+}
